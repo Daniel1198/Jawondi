@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jawondi/loading.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -18,7 +19,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int loadingPercent = 0;
+  int loading = 0;
+  bool errorPage = false;
 
   late WebViewController controller = WebViewController()
     ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -27,20 +29,24 @@ class _MyHomePageState extends State<MyHomePage> {
       NavigationDelegate(
         onProgress: (int progress) {
           setState(() {
-            loadingPercent = progress;
+            loading = progress;
           });
         },
         onPageStarted: (String url) {
           setState(() {
-            loadingPercent = 0;
+            loading = 0;
           });
         },
         onPageFinished: (String url) {
           setState(() {
-            loadingPercent = 100;
+            loading = 100;
           });
         },
-        onWebResourceError: (WebResourceError error) {},
+        onWebResourceError: (WebResourceError error) {
+          setState(() {
+            errorPage = true;
+          });
+        },
         onNavigationRequest: (NavigationRequest request) {
           if (request.url.startsWith('https://www.youtube.com/')) {
             return NavigationDecision.prevent;
@@ -49,13 +55,47 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       ),
     )
-    ..loadRequest(Uri.parse('https://store.goldeninstinct-ci.com'));
+    ..loadRequest(Uri.parse('https://store.goldeninstinct-ci.com'))
+        .onError((error, stackTrace) => {errorPage = true})
+        .timeout(const Duration(minutes: 1), onTimeout: () {
+      setState(() {
+        errorPage = true;
+      });
+    });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: WebViewWidget(
-      controller: controller,
+        body: Stack(
+      children: [
+        if (!errorPage) WebViewWidget(controller: controller),
+        if (loading < 100) const LoadingScreen(),
+        if (errorPage)
+          SizedBox(
+            width: MediaQuery.of(context).size.width,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image(
+                  image: const AssetImage('images/no-wifi.png'),
+                  width: MediaQuery.of(context).size.width * 0.5,
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                MaterialButton(
+                    color: Colors.grey,
+                    onPressed: () {
+                      setState(() {
+                        errorPage = false;
+                      });
+                      controller.reload();
+                    },
+                    child: const Text('Recharger la page'))
+              ],
+            ),
+          )
+      ],
     ));
   }
 }

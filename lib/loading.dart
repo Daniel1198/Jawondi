@@ -13,8 +13,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child: SpinKitWave(
-          color: Colors.blueGrey,
+        child: SpinKitPouringHourGlass(
+          color: Color.fromARGB(255, 255, 175, 55),
           size: 50,
         ),
       ),
