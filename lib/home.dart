@@ -71,27 +71,48 @@ class _MyHomePageState extends State<MyHomePage> {
         if (!errorPage) WebViewWidget(controller: controller),
         if (loading < 100) const LoadingScreen(),
         if (errorPage)
-          SizedBox(
+          Container(
+            padding: const EdgeInsets.all(30),
             width: MediaQuery.of(context).size.width,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image(
-                  image: const AssetImage('images/no-wifi.png'),
+                const Text(
+                  'Pas de connexion',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 23,
+                  ),
+                ),
+                const SizedBox(height: 30),
+                SizedBox(
                   width: MediaQuery.of(context).size.width * 0.5,
+                  height: MediaQuery.of(context).size.width * 0.5,
+                  child: const Image(
+                    image: AssetImage('images/no-wifi.png'),
+                  ),
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                const Text(
+                  'Un problème de connexion s\'est produit, veuillez réessayer',
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(
                   height: 20,
                 ),
                 MaterialButton(
-                    color: Colors.grey,
+                    elevation: 0,
+                    color: Colors.grey.shade300,
                     onPressed: () {
                       setState(() {
                         errorPage = false;
                       });
                       controller.reload();
                     },
-                    child: const Text('Recharger la page'))
+                    child: const Text('Réessayez'))
               ],
             ),
           )
